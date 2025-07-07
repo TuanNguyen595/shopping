@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-  QLabel, QMainWindow, QGridLayout, QVBoxLayout, QWidget
+    QLabel, QMainWindow, QGridLayout, QVBoxLayout, QWidget, QTabWidget
 )
 from PySide6.QtCore import Qt
 from view.components.MyWidget import CWidget
@@ -10,16 +10,23 @@ class MainWindow(QMainWindow):
     super().__init__()
     self.setWindowTitle('Tạp Hóa Hiền Dương')
     self.showMaximized()
-    layout = QGridLayout()
-    layout.addWidget(self.createNavigationBar(), 0, 0)
-    layout.addWidget(OrderWindow(), 0, 1)
-    layout.setColumnStretch(0, 1)
-    layout.setColumnStretch(1, 7)
-    layout.setSpacing(0)
-    layout.setContentsMargins(0, 0, 0, 0)
-    container = QWidget()
-    container.setLayout(layout)
-    self.setCentralWidget(container)
+    mainTab = QTabWidget()
+    mainTab.setTabPosition(QTabWidget.TabPosition.North)
+    mainTab.addTab(OrderWindow(), "Ban hang")
+    mainTab.addTab(CWidget(), "Mua hang")
+    mainTab.addTab(CWidget(), "Thong ke")
+    mainTab.addTab(CWidget(), "Reversed")
+    mainTab.addTab(CWidget(), "Reversed")
+    #layout = QGridLayout()
+    #layout.addWidget(self.createNavigationBar(), 0, 0)
+    #layout.addWidget(OrderWindow(), 0, 1)
+    #layout.setColumnStretch(0, 1)
+    #layout.setColumnStretch(1, 7)
+    #layout.setSpacing(0)
+    #layout.setContentsMargins(0, 0, 0, 0)
+    #container = QWidget()
+    #container.setLayout(layout)
+    self.setCentralWidget(mainTab)
 
   def createNavigationBar(self):
     layout = QVBoxLayout()

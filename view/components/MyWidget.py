@@ -10,11 +10,15 @@ class CWidget(QWidget):
     g = random.randint(100, 255)
     b = random.randint(100, 255)
     color = f"rgb({r}, {g}, {b})"
+    r = random.randint(100, 255)
+    g = random.randint(100, 255)
+    b = random.randint(100, 255)
+    border_color = f"rgb({r}, {g}, {b})"
     
     # Apply background and border using stylesheet
     self.setStyleSheet(f"""
         background-color: {color};
-        border: 1px solid black;
+        border: 2px solid {border_color};
     """)
     #layout = QVBoxLayout()
     #label = QLabel()
