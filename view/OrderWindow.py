@@ -34,7 +34,7 @@ class OrderWindow(QWidget):
     self.order_items = QTableWidget()
     self.order_items.setColumnCount(4)
     self.order_items.setHorizontalHeaderLabels(["Item", "Unit Price", "Quantity", "Total"])
-    self.order_items.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+    self.order_items.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.order_items.setColumnWidth(0, 120)
 
     # Order items data
@@ -45,7 +45,7 @@ class OrderWindow(QWidget):
     ]
     self.total_order_price = sum(item["price"] * item["quantity"] for item in items)
     self.order_items.setRowCount(len(items))  # +1 for the total row
-    self.order_items.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+    self.order_items.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
     #self.order_items.setMinimumHeight(20)
     for row, item in enumerate(items):
         total = item["price"] * item["quantity"]
@@ -64,12 +64,12 @@ class OrderWindow(QWidget):
     #footer_layout.addWidget(spacer, 3)
 
     total_label = QLabel("Total:")
-    total_label.setAlignment(Qt.AlignmentFlag.AlignLeft| Qt.AlignVCenter)
+    total_label.setAlignment(Qt.AlignmentFlag.AlignLeft| Qt.AlignmentFlag.AlignVCenter)
     total_label.setStyleSheet("font-size: 16px; font-weight: bold;")
     footer_layout.addWidget(total_label, 3)
 
     total_value = QLabel(f"{self.total_order_price:,}")
-    total_value.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignVCenter)
+    total_value.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
     total_value.setStyleSheet("font-weight: bold;")
     footer_layout.addWidget(total_value, 1)
 
