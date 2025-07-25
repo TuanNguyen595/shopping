@@ -1,5 +1,4 @@
 import sqlite3
-from datetime import datetime
 
 class Model:
   def __init__(self):
@@ -9,11 +8,12 @@ class Model:
   def createTable(self):
     self.cursor.execute('''
       CREATE TABLE IF NOT EXISTS item (
-          item_id INTEGER PRIMARY KEY AUTOINCREMENT,
-          item_name TEXT NOT NULL,
-          price REAL NOT NULL,
-          imported_price REAL NOT NULL,
-          stock INTEGER NOT NULL
+          item_id TEXT PRIMARY KEY,
+          item_name TEXT,
+          stock INTEGER NOT NULL,
+          retail_price INTEGER NOT NULL,
+          wholesale_price INTEGER,
+          imported_price INTEGER NOT NULL
         )
       ''')
     self.cursor.execute('''
@@ -28,13 +28,13 @@ class Model:
     ''')
     self.cursor.execute('''
       CREATE TABLE IF NOT EXISTS customer (
-        customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        customer_id INTEGER PRIMARY KEY,
         name TEXT,
         birthday DATE,
         id_card TEXT,
         resident_address TEXT,
         phone_number TEXT
-        debt REAL
+        debt INTEGER
       )
     ''')
     self.cursor.execute('''
@@ -42,13 +42,13 @@ class Model:
         order_id INTEGER PRIMARY KEY AUTOINCREMENT,
         customer_id INTEGER NOT NULL,
         order_date DATE NOT NULL,
-        total_amount REAL NOT NULL,
+        total_amount INTEGER NOT NULL,
         FOREIGN KEY(customer_id) REFERENCES customer(customer_id)
       )
     ''')
     self.conn.commit()
-  def addItem(self, item_name, price, imported_price, stock):
-    self.cursor.execute("INSERT INTO item (item_name, price, imported_price, stock) VALUES (?, ?, ?, ?)", (item_name, price, imported_price, stock))
+  def addItem(self, item_id, item_name, stock, retail_price, wholesale_price, imported_price):
+    self.cursor.execute("INSERT INTO item (item_id, item_name, stock, retail_price, wholesale_price, imported_price) VALUES (?, ?, ?, ?, ?, ?)", (item_id, item_name, stock, retail_price, wholesale_price, imported_price))
     self.conn.commit()
     return self.cursor.lastrowid
   def addOrder(self, customer_id, order_date, total_amount):

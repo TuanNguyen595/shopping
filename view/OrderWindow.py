@@ -9,6 +9,8 @@ class OrderWindow(QWidget):
   def __init__(self):
     super().__init__()
     self.createLayout()
+  def setDatabase(self, database):
+    self.db = database
   def createLayout(self):
     self.utilColumn = CWidget()
     self.utilLayout = QVBoxLayout()
@@ -110,4 +112,7 @@ class OrderWindow(QWidget):
     layout.addWidget(self.utilColumn, stretch=1)
     layout.addWidget(self.infoColumn, stretch=2)
     self.setLayout(layout)
+  
+  def onScannerResult(self, text):
+    print('OrderWindow: ' + text)
     

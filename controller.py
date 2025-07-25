@@ -9,5 +9,6 @@ class Controller:
   def run(self):
     app = QApplication()
     self.view = MainWindow()
+    self.view.setDatabase(self.db)
     self.view.show()
     sys.exit(app.exec())
