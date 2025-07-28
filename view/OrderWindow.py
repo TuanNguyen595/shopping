@@ -3,13 +3,14 @@ from PySide6.QtWidgets import (
   QFormLayout, QGroupBox, QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QTabWidget
 )
 from PySide6.QtCore import Qt
+from model import Model
 from view.components.MyWidget import CWidget
 
 class OrderWindow(QWidget):
   def __init__(self):
     super().__init__()
     self.createLayout()
-  def setDatabase(self, database):
+  def setDatabase(self, database: Model):
     self.db = database
   def createLayout(self):
     self.utilColumn = CWidget()
@@ -40,22 +41,11 @@ class OrderWindow(QWidget):
     self.order_items.setColumnWidth(0, 120)
 
     # Order items data
-    items = [
-        {"name": "Milk", "price": 20000, "quantity": 2},
-        {"name": "Bread", "price": 10000, "quantity": 3},
-        {"name": "Eggs", "price": 5000, "quantity": 6},
-    ]
-    self.total_order_price = sum(item["price"] * item["quantity"] for item in items)
-    self.order_items.setRowCount(len(items))  # +1 for the total row
+    self.total_order_price = 0
     self.order_items.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOn)
     #self.order_items.setMinimumHeight(20)
-    for row, item in enumerate(items):
-        total = item["price"] * item["quantity"]
-        self.order_items.setItem(row, 0, QTableWidgetItem(item["name"]))
-        self.order_items.setItem(row, 1, QTableWidgetItem(f"{item['price']:,}"))
-        self.order_items.setItem(row, 2, QTableWidgetItem(str(item["quantity"])))
-        self.order_items.setItem(row, 3, QTableWidgetItem(f"{total:,}"))
 
+    #self.order_items.cellChanged.connect(self.onTableChanged)
     # Fill total row (last row)
     # --- Total row (fixed footer)
     footer = QWidget()
@@ -70,10 +60,10 @@ class OrderWindow(QWidget):
     total_label.setStyleSheet("font-size: 16px; font-weight: bold;")
     footer_layout.addWidget(total_label, 3)
 
-    total_value = QLabel(f"{self.total_order_price:,}")
-    total_value.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
-    total_value.setStyleSheet("font-weight: bold;")
-    footer_layout.addWidget(total_value, 1)
+    self.total_value = QLabel(f"{self.total_order_price:,}")
+    self.total_value.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignVCenter)
+    self.total_value.setStyleSheet("font-weight: bold;")
+    footer_layout.addWidget(self.total_value, 1)
 
     footer.setLayout(footer_layout)
 
@@ -114,5 +104,24 @@ class OrderWindow(QWidget):
     self.setLayout(layout)
   
   def onScannerResult(self, text):
-    print('OrderWindow: ' + text)
+    item = self.db.getItemById(text)
+    if item is None: return
+    self.order_items.insertRow(0)
+    self.order_items.setItem(0, 0, QTableWidgetItem(item[1]))
+    self.order_items.setItem(0, 1, QTableWidgetItem(f"{item[4]:,}"))
+    quantity = 1;
+    total = item[4] * quantity
+    self.order_items.setItem(0, 3, QTableWidgetItem(f"{total:,}"))
+    self.order_items.setItem(0, 2, QTableWidgetItem(f"{quantity:,}"))
+    self.sumTotalPrice()
+
+  def sumTotalPrice(self):
+    total = 0
+    for row in range(self.order_items.rowCount()):
+      quantity = int(self.order_items.item(row, 2).text().replace(",", ""))
+      price_per_unit = int(self.order_items.item(row, 1).text().replace(",", ""))
+      total += quantity * price_per_unit
+    self.total_order_price = total
+    self.total_value.setText(f"{self.total_order_price:,}")
+    return total
     

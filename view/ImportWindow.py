@@ -42,7 +42,7 @@ class ImportWindow(QWidget):
     self.infoColumn.addWidget(self.retailPrice)
     self.infoColumn.addWidget(self.wholesalePrice)
     self.addButton = QPushButton("Add")
-    self.editButton = QPushButton("Edit")
+    self.editButton = QPushButton("Update")
     self.removeButton = QPushButton("Remove")
     self.findButton = QPushButton("Find")
     self.toolColumn.addWidget(self.findButton)
@@ -50,27 +50,14 @@ class ImportWindow(QWidget):
     self.toolColumn.addWidget(self.addButton)
     self.toolColumn.addWidget(self.removeButton)
     self.setLayout(self.layoutGrid)
-    self.addButton.clicked.connect(self.onAddButtonClicked)
 
   def onScannerResult(self, text):
     self.itemID.setText(text)
-  def onAddButtonClicked(self):
-    itemID = self.itemID.text()
-    itemName = self.itemName.text()
-    if self.itemInStock.text() == "":
-      itemInStock = 0
-    else:
-      itemInStock = int(self.itemInStock.text())
-    if self.importPrice.text() == "":
-      importPrice = 0
-    else:
-      importPrice = int(self.importPrice.text())
-    if self.retailPrice.text() == "":
-      retailPrice = 0
-    else:
-      retailPrice = int(self.retailPrice.text())
-    if self.wholesalePrice.text() == "":
-      wholesalePrice = 0
-    else:
-      wholesalePrice = int(self.wholesalePrice.text())
-    self.db.addItem(itemID, itemName, itemInStock, importPrice, retailPrice, wholesalePrice)
+    item = self.db.getItemById(text)
+    if item:
+      self.itemName.setText(item[1])
+      self.itemInStock.setText(str(item[2]))
+      self.importPrice.setText(str(item[4]))
+      self.retailPrice.setText(str(item[3]))
+      self.wholesalePrice.setText(str(item[5]))
+  
