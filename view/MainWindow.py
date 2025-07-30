@@ -11,7 +11,8 @@ class MainWindow(QMainWindow):
   def __init__(self):
     super().__init__()
     self.setWindowTitle('Tạp Hóa Hiền Dương')
-    self.showMaximized()
+    #self.showMaximized()
+    self.setGeometry(0, 0, 800, 600)
     self.mockScanner = QLineEdit()
     self.mockScanner.setPlaceholderText('Fake scanner output')
     layout = QVBoxLayout()

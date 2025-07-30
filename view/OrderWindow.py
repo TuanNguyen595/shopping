@@ -35,10 +35,10 @@ class OrderWindow(QWidget):
 
     # Table widget
     self.order_items = QTableWidget()
-    self.order_items.setColumnCount(4)
-    self.order_items.setHorizontalHeaderLabels(["Item", "Unit Price", "Quantity", "Total"])
+    self.order_items.setColumnCount(5)
+    self.order_items.setHorizontalHeaderLabels(["Item", "Unit Price", "Quantity", "Total",''])
     self.order_items.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    self.order_items.setColumnWidth(0, 120)
+    self.order_items.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
 
     # Order items data
     self.total_order_price = 0
@@ -114,6 +114,10 @@ class OrderWindow(QWidget):
     self.order_items.setItem(0, 3, QTableWidgetItem(f"{total:,}"))
     self.order_items.setItem(0, 2, QTableWidgetItem(f"{quantity:,}"))
     self.sumTotalPrice()
+    delete_item = QTableWidgetItem("❌")  # or just "X"
+    delete_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+    delete_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
+    self.order_items.setItem(0, 4, delete_item)
 
   def sumTotalPrice(self):
     total = 0
