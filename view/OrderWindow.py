@@ -1,15 +1,27 @@
+from sqlite3 import Date
 from PySide6.QtWidgets import (
-  QLabel, QLayout, QLineEdit, QMainWindow, QGridLayout, QPushButton, QVBoxLayout, QWidget, QHBoxLayout,
+  QCheckBox, QLabel, QLayout, QLineEdit, QMainWindow, QGridLayout, QPushButton, QVBoxLayout, QWidget, QHBoxLayout,
   QFormLayout, QGroupBox, QTableWidget, QComboBox, QHeaderView, QTableWidgetItem, QTabWidget
 )
+from PySide6.QtGui import QIcon
 from PySide6.QtCore import Qt
 from model import Model
 from view.components.MyWidget import CWidget
+from view.components import gen_vietqr
+from view.components.Calendar import CalendarDialog
+from view.components.CPushButton import CPushButton
 
 class OrderWindow(QWidget):
   def __init__(self):
     super().__init__()
     self.createLayout()
+  def popupQRCode(self):
+    account_number = '1029332970'
+    bank_bin = '970436'
+    name = 'Tap hoa hien duong' 
+    amount = self.total_order_price
+    qr = gen_vietqr.generate_vietqr(account_number, bank_bin, name, amount, "Thanh toan don hang", "vietqr.png")
+    self.QRDialog = gen_vietqr.QRDialog(qr, self)
   def setDatabase(self, database: Model):
     self.db = database
   def createLayout(self):
@@ -24,7 +36,7 @@ class OrderWindow(QWidget):
     tabWidget.setLayout(orderTabContent)
     self.utilTabWidget.addTab(tabWidget, "Tim kiem order")
     self.utilLayout.addWidget(self.utilTabWidget)
-    self.utilLayout.addWidget(QPushButton("Tim kiem"), alignment=Qt.AlignmentFlag.AlignCenter)
+    self.utilLayout.addWidget(CPushButton("Tim kiem"), alignment=Qt.AlignmentFlag.AlignCenter)
     self.utilColumn.setLayout(self.utilLayout)
 
 
@@ -35,10 +47,10 @@ class OrderWindow(QWidget):
 
     # Table widget
     self.order_items = QTableWidget()
-    self.order_items.setColumnCount(5)
-    self.order_items.setHorizontalHeaderLabels(["Item", "Unit Price", "Quantity", "Total",''])
+    self.order_items.setColumnCount(6)
+    self.order_items.setHorizontalHeaderLabels(["ID", "Item", "Unit Price", "Quantity", "Total",''])
     self.order_items.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-    self.order_items.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)
+    self.order_items.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
 
     # Order items data
     self.total_order_price = 0
@@ -69,14 +81,29 @@ class OrderWindow(QWidget):
 
     header = CWidget()
     header_layout = QGridLayout()
+    self.order_id = QLineEdit()
+    self.order_date = QLineEdit()
+    self.order_date.setPlaceholderText(Date.today().strftime("%Y-%m-%d"))
+    self.customer_name = QLineEdit()
+    self.customer_name_lable = QLabel("Ten khach hang")
+    order_date_layout = QHBoxLayout()
+    order_date_layout.addWidget(self.order_date)
+    calendar_button = QPushButton()
+    calendar_button.setIcon(QIcon.fromTheme("calendar"))  # Uses system icon if available
+    calendar_button.setFixedWidth(30)
+    calendar_button.clicked.connect(self.show_calendar)
+    order_date_layout.addWidget(calendar_button)
+    order_date_widget = CWidget()
+    order_date_widget.setLayout(order_date_layout)
+    self.order_status = QCheckBox()
     header_layout.addWidget(QLabel("Ma don hang"), 0, 0)
-    header_layout.addWidget(QLineEdit(), 0, 1)
+    header_layout.addWidget(self.order_id, 0, 1)
     header_layout.addWidget(QLabel("Ngay/gio"), 1, 0)
-    header_layout.addWidget(QLineEdit(), 1, 1)
-    header_layout.addWidget(QLabel("Ten khac hang"), 2, 0)
-    header_layout.addWidget(QLineEdit(), 2, 1)
-    header_layout.addWidget(QLabel("Trang thai"), 3, 0)
-    header_layout.addWidget(QLineEdit(), 3, 1)
+    header_layout.addWidget(order_date_widget, 1, 1)
+    header_layout.addWidget(self.customer_name_lable, 2, 0)
+    header_layout.addWidget(self.customer_name, 2, 1)
+    header_layout.addWidget(QLabel("Da thanh toan"), 3, 0)
+    header_layout.addWidget(self.order_status, 3, 1)
     header_layout.setColumnStretch(0,1)
     header_layout.setColumnStretch(1,2)
     header.setLayout(header_layout)
@@ -86,15 +113,19 @@ class OrderWindow(QWidget):
     layout.addWidget(footer)
 
 
-    self.createOrderBtn = QPushButton("Payment")
+    self.createOrderBtn = CPushButton("Payment")
     self.createOrderBtn.setMinimumHeight(40)
-    self.cancelOrderBtn = QPushButton("Cancel")
+    self.cancelOrderBtn = CPushButton("Cancel")
     self.cancelOrderBtn.setMinimumHeight(40)
    
+    self.saveOrderBtn = CPushButton("Save")
+    self.saveOrderBtn.setMinimumHeight(40)
+   
     layout = QGridLayout()
-    layout.addWidget(self.infoBox, 0, 0, 1, 2)
+    layout.addWidget(self.infoBox, 0, 0, 1, 3)
     layout.addWidget(self.createOrderBtn, 1, 0)
     layout.addWidget(self.cancelOrderBtn, 1, 1)
+    layout.addWidget(self.saveOrderBtn, 1, 2)
     layout.setRowStretch(0, 1)
     layout.setRowStretch(1, 1)
     self.infoColumn.setLayout(layout)
@@ -107,25 +138,30 @@ class OrderWindow(QWidget):
     item = self.db.getItemById(text)
     if item is None: return
     self.order_items.insertRow(0)
-    self.order_items.setItem(0, 0, QTableWidgetItem(item[1]))
-    self.order_items.setItem(0, 1, QTableWidgetItem(f"{item[4]:,}"))
+    self.order_items.setItem(0, 0, QTableWidgetItem(item[0]))
+    self.order_items.setItem(0, 1, QTableWidgetItem(item[1]))
+    self.order_items.setItem(0, 2, QTableWidgetItem(f"{item[4]:,}"))
     quantity = 1;
     total = item[4] * quantity
-    self.order_items.setItem(0, 3, QTableWidgetItem(f"{total:,}"))
-    self.order_items.setItem(0, 2, QTableWidgetItem(f"{quantity:,}"))
+    self.order_items.setItem(0, 4, QTableWidgetItem(f"{total:,}"))
+    self.order_items.setItem(0, 3, QTableWidgetItem(f"{quantity:,}"))
     self.sumTotalPrice()
     delete_item = QTableWidgetItem("❌")  # or just "X"
     delete_item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
     delete_item.setFlags(Qt.ItemFlag.ItemIsEnabled | Qt.ItemFlag.ItemIsSelectable)
-    self.order_items.setItem(0, 4, delete_item)
+    self.order_items.setItem(0, 5, delete_item)
 
   def sumTotalPrice(self):
     total = 0
     for row in range(self.order_items.rowCount()):
-      quantity = int(self.order_items.item(row, 2).text().replace(",", ""))
-      price_per_unit = int(self.order_items.item(row, 1).text().replace(",", ""))
+      quantity = int(self.order_items.item(row, 3).text().replace(",", ""))
+      price_per_unit = int(self.order_items.item(row, 2).text().replace(",", ""))
       total += quantity * price_per_unit
     self.total_order_price = total
     self.total_value.setText(f"{self.total_order_price:,}")
     return total
-    
+  def show_calendar(self):
+    dialog = CalendarDialog()
+    if dialog.exec_():
+      self.order_date.setText(dialog.selected_date().toString("yyyy-MM-dd"))
+ 

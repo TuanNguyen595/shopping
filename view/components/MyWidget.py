@@ -17,7 +17,6 @@ class CWidget(QWidget):
     
     # Apply background and border using stylesheet
     self.setStyleSheet(f"""
-        background-color: {color};
         border: 2px solid {border_color};
     """)
     #layout = QVBoxLayout()

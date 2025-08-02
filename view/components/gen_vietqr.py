@@ -1,5 +1,5 @@
 import qrcode
-from PySide6.QtWidgets import QDialog
+from PySide6.QtWidgets import QDialog, QPushButton
 from PySide6.QtCore import Qt
 
 def generate_vietqr(account_number: str, bank_bin: str, name: str, amount: int, message: str, output_file="vietqr.png"):
@@ -65,6 +65,11 @@ class QRDialog(QDialog):
         label.setPixmap(QPixmap.fromImage(qimage).scaled(250, 250))
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
+
+        self.paid_button = QPushButton('Da thanh toan')
+        self.unpaid_button = QPushButton('Chua thanh toan')
+        layout.addWidget(self.paid_button)
+        layout.addWidget(self.unpaid_button)
 
         self.setLayout(layout)
 

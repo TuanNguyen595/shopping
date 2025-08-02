@@ -28,31 +28,36 @@ class Model:
     ''')
     self.cursor.execute('''
       CREATE TABLE IF NOT EXISTS customer (
-        customer_id INTEGER PRIMARY KEY,
+        customer_id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         birthday DATE,
         id_card TEXT,
         resident_address TEXT,
-        phone_number TEXT
+        phone_number TEXT,
         debt INTEGER
       )
     ''')
     self.cursor.execute('''
       CREATE TABLE IF NOT EXISTS orders (
         order_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        customer_id INTEGER NOT NULL,
+        customer_id INTEGER,
         order_date DATE NOT NULL,
         total_amount INTEGER NOT NULL,
+        paid BOOLEAN NOT NULL,
         FOREIGN KEY(customer_id) REFERENCES customer(customer_id)
       )
     ''')
     self.conn.commit()
+  def addCustomer(self, name, birthday=None, id_card=None, resident_address=None, phone_number=None, debt=None):
+    self.cursor.execute("INSERT INTO customer (name, birthday, id_card, resident_address, phone_number, debt) VALUES (?, ?, ?, ?, ?, ?)", (name, birthday, id_card, resident_address, phone_number, debt))
+    self.conn.commit()
+    return self.cursor.lastrowid
   def addItem(self, item_id, item_name, stock, retail_price, wholesale_price, imported_price):
     self.cursor.execute("INSERT INTO item (item_id, item_name, stock, retail_price, wholesale_price, imported_price) VALUES (?, ?, ?, ?, ?, ?)", (item_id, item_name, stock, retail_price, wholesale_price, imported_price))
     self.conn.commit()
     return self.cursor.lastrowid
-  def addOrder(self, customer_id, order_date, total_amount):
-    self.cursor.execute("INSERT INTO orders (customer_id, order_date, total_amount) VALUES (?, ?, ?)", (customer_id, order_date, total_amount))
+  def addOrder(self, customer_id, order_date, total_amount, paid=True):
+    self.cursor.execute("INSERT INTO orders (customer_id, order_date, total_amount, paid) VALUES (?, ?, ?, ?)", (customer_id, order_date, total_amount, paid))
     self.conn.commit()
     return self.cursor.lastrowid
   def addOrderItem(self, order_id, item_id, quantity):

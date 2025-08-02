@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from view.components.MyWidget import CWidget
+from view.components.CPushButton import CPushButton
 from model import Model
 
 class ImportWindow(QWidget):
@@ -41,10 +42,10 @@ class ImportWindow(QWidget):
     self.infoColumn.addWidget(self.importPrice)
     self.infoColumn.addWidget(self.retailPrice)
     self.infoColumn.addWidget(self.wholesalePrice)
-    self.addButton = QPushButton("Add")
-    self.editButton = QPushButton("Update")
-    self.removeButton = QPushButton("Remove")
-    self.findButton = QPushButton("Find")
+    self.addButton = CPushButton("Add")
+    self.editButton = CPushButton("Update")
+    self.removeButton = CPushButton("Remove")
+    self.findButton = CPushButton("Find")
     self.toolColumn.addWidget(self.findButton)
     self.toolColumn.addWidget(self.editButton)
     self.toolColumn.addWidget(self.addButton)
