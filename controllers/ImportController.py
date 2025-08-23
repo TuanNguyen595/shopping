@@ -38,21 +38,24 @@ class ImportController(QObject):
       wholesalePrice = int(self.view.wholesalePrice.text())
     self.model.addItem(itemID, itemName, itemInStock, importPrice, retailPrice, wholesalePrice)
   def onEditButtonClicked(self):
+    self.model.changeItemName(self.view.itemID.text(), self.view.itemName.text())
     if self.view.itemInStock.text() != "":
       self.model.changeItemStock(self.view.itemID.text(), int(self.view.itemInStock.text()))
     if self.view.retailPrice.text() != "":
-      self.model.changeItemPrice(self.view.itemID.text(), int(self.view.importPrice.text()))
+      self.model.changeItemPrice(self.view.itemID.text(), int(self.view.retailPrice.text()))
     if self.view.importPrice.text() != "":
       self.model.changeItemImportedPrice(self.view.itemID.text(), int(self.view.importPrice.text()))
+    if self.view.wholesalePrice.text() != "":
+      self.model.changeItemWholesalePrice(self.view.itemID.text(), int(self.view.wholesalePrice.text()))
     pass
   def onFindButtonClicked(self):
     item = self.model.getItemById(self.view.itemID.text())
     if item:
       self.view.itemName.setText(item[1])
       self.view.itemInStock.setText(str(item[2]))
-      self.view.importPrice.setText(str(item[4]))
+      self.view.importPrice.setText(str(item[5]))
       self.view.retailPrice.setText(str(item[3]))
-      self.view.wholesalePrice.setText(str(item[5]))
+      self.view.wholesalePrice.setText(str(item[4]))
     pass
   def onRemoveButtonClicked(self):
     self.model.removeItemById(self.view.itemID.text())

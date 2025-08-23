@@ -16,8 +16,8 @@ class OrderWindow(QWidget):
     super().__init__()
     self.createLayout()
   def popupQRCode(self):
-    account_number = '1029332970'
-    bank_bin = '970436'
+    account_number = self.db.loadSetting("bank_number")
+    bank_bin = self.db.loadSetting("bank_bin")
     name = 'Tap hoa hien duong' 
     amount = self.total_order_price
     qr = gen_vietqr.generate_vietqr(account_number, bank_bin, name, amount, "Thanh toan don hang", "vietqr.png")

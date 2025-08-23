@@ -41,6 +41,13 @@ class OrderController(QObject):
                         self.view.total_value.text())
 
     for row in range(self.view.order_items.rowCount()):
+      quantity = int(self.view.order_items.item(row, 3).text().replace(",", ""))
+      item_id = self.view.order_items.item(row, 0).text()
+      current_stock = self.model.getItemStock(item_id) or 0
+      remaining_stock = current_stock - quantity
+      if remaining_stock < 0:
+        remaining_stock = 0
+      self.model.changeItemStock(item_id, current_stock - quantity)
       self.model.addOrderItem(order_id, self.view.order_items.item(row, 0).text(), int(self.view.order_items.item(row, 3).text()))
     self.view.order_items.setRowCount(0)
     self.sumTotalPrice()

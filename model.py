@@ -7,6 +7,19 @@ class Model:
     self.createTable()
   def createTable(self):
     self.cursor.execute('''
+      CREATE TABLE IF NOT EXISTS barcodes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        code TEXT NOT NULL,
+        name TEXT NOT NULL
+      )
+    ''')
+    self.cursor.execute('''
+      CREATE TABLE IF NOT EXISTS user_settings (
+        key TEXT PRIMARY KEY,
+        value TEXT
+      )
+    ''')
+    self.cursor.execute('''
       CREATE TABLE IF NOT EXISTS item (
           item_id TEXT PRIMARY KEY,
           item_name TEXT,
@@ -48,6 +61,40 @@ class Model:
       )
     ''')
     self.conn.commit()
+  def addBarcode(self, name, code):
+    self.cursor.execute("INSERT INTO barcodes (name, code) VALUES (?, ?)", (name, code))
+    self.conn.commit()
+    return self.cursor.lastrowid
+  def getBarcodeByName(self, name):
+    self.cursor.execute("SELECT * FROM barcodes WHERE name = ?", (name,))
+    return self.cursor.fetchone()
+  def getBarcodeByCode(self, code):
+    self.cursor.execute("SELECT * FROM barcodes WHERE code = ?", (code,))
+    return self.cursor.fetchone()
+  def getAllBarcodes(self):
+    self.cursor.execute("SELECT * FROM barcodes")
+    return self.cursor.fetchall()
+  def removeBarcodeById(self, barcode_id):
+    self.cursor.execute("DELETE FROM barcodes WHERE id = ?", (barcode_id,))
+    self.conn.commit()
+  def removeAllBarcodes(self):
+    self.cursor.execute("DELETE FROM barcodes")
+    self.conn.commit()
+  def removeBarcodeByCode(self, code):
+    print(f"Removing barcode with code: {code}")
+    self.cursor.execute("DELETE FROM barcodes WHERE code = ?", (code,))
+    self.conn.commit()
+  def updateBarcodeName(self, barcode_id, new_name):
+    self.cursor.execute("UPDATE barcodes SET name = ? WHERE id = ?", (new_name, barcode_id))
+    self.conn.commit()
+  
+  def saveSetting(self, key, value):
+    self.cursor.execute("INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)", (key, value))
+    self.conn.commit()
+  def loadSetting(self, key, default=None):
+    self.cursor.execute("SELECT value FROM user_settings WHERE key=?", (key,))
+    row = self.cursor.fetchone()
+    return row[0] if row else default
   def addCustomer(self, name, birthday=None, id_card=None, resident_address=None, phone_number=None, debt=None):
     self.cursor.execute("INSERT INTO customer (name, birthday, id_card, resident_address, phone_number, debt) VALUES (?, ?, ?, ?, ?, ?)", (name, birthday, id_card, resident_address, phone_number, debt))
     self.conn.commit()
@@ -105,11 +152,17 @@ class Model:
   def getCustomerByDebt(self):
     self.cursor.execute("SELECT * FROM customer WHERE debt > ?", (0,))
     return self.cursor.fetchall()
+  def changeItemName(self, item_id, new_name):
+    self.cursor.execute("UPDATE item SET item_name = ? WHERE item_id = ?", (new_name, item_id))
+    self.conn.commit()
+  def changeItemWholesalePrice(self, item_id, new_wholesale_price):
+    self.cursor.execute("UPDATE item SET wholesale_price = ? WHERE item_id = ?", (new_wholesale_price, item_id))
+    self.conn.commit()
   def changeItemStock(self, item_id, new_stock):
     self.cursor.execute("UPDATE item SET stock = ? WHERE item_id = ?", (new_stock, item_id))
     self.conn.commit()
   def changeItemPrice(self, item_id, new_price):
-    self.cursor.execute("UPDATE item SET price = ? WHERE item_id = ?", (new_price, item_id))
+    self.cursor.execute("UPDATE item SET retail_price = ? WHERE item_id = ?", (new_price, item_id))
     self.conn.commit()
   def changeItemImportedPrice(self, item_id, new_imported_price):
     self.cursor.execute("UPDATE item SET imported_price = ? WHERE item_id = ?", (new_imported_price, item_id))
@@ -126,5 +179,9 @@ class Model:
   def removeOrderItemsByOrderId(self, order_id):
     self.cursor.execute("DELETE FROM ordered_items WHERE order_id = ?", (order_id,))
     self.conn.commit()
+  def getItemStock(self, item_id):
+    self.cursor.execute("SELECT stock FROM item WHERE item_id = ?", (item_id,))
+    row = self.cursor.fetchone()
+    return row[0] if row else None
 
 

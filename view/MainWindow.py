@@ -5,6 +5,8 @@ from PySide6.QtCore import Qt, Signal, Slot
 from view.components.MyWidget import CWidget
 from view.OrderWindow import OrderWindow
 from view.ImportWindow import ImportWindow
+from view.SettingWindow import SettingWindow
+from view.CustomBarcodesWindow import BarcodeListWindow 
 
 class MainWindow(QMainWindow):
   mockScannerSignal = Signal(str)
@@ -16,15 +18,17 @@ class MainWindow(QMainWindow):
     self.mockScanner = QLineEdit()
     self.mockScanner.setPlaceholderText('Fake scanner output')
     layout = QVBoxLayout()
-    layout.addWidget(self.mockScanner)
-    mainTab = QTabWidget()
-    mainTab.setTabPosition(QTabWidget.TabPosition.North)
+    #layout.addWidget(self.mockScanner)
+    self.mainTab = QTabWidget()
+    self.mainTab.setTabPosition(QTabWidget.TabPosition.North)
     self.orderWindow = OrderWindow()
     self.importWindow = ImportWindow()
-    mainTab.addTab(self.orderWindow, "Ban hang")
-    mainTab.addTab(self.importWindow, "Mua hang")
-    mainTab.addTab(CWidget(), "Thong ke")
-    layout.addWidget(mainTab)
+    self.mainTab.addTab(self.orderWindow, "Ban hang")
+    self.mainTab.addTab(self.importWindow, "Mua hang")
+    #self.mainTab.addTab(CWidget(), "Thong ke")
+    self.settingWindow = SettingWindow()
+    self.mainTab.addTab(self.settingWindow, "Cai dat")
+    layout.addWidget(self.mainTab)
     mainWidget = CWidget()
     mainWidget.setLayout(layout)
     self.setCentralWidget(mainWidget)
@@ -34,4 +38,6 @@ class MainWindow(QMainWindow):
     self.db = database
     self.orderWindow.setDatabase(database)
     self.importWindow.setDatabase(database)
-
+    self.settingWindow.setDatabase(database)
+    self.barcodeListWindow = BarcodeListWindow(database)
+    #self.mainTab.addTab(self.barcodeListWindow, "Ma vach")
