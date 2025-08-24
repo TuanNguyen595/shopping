@@ -34,9 +34,9 @@ class BarcodeWidget(QWidget):
     self.text_label = QLabel(label_text, alignment=Qt.AlignCenter)
 
     # --- button ---
-    self.edit_btn = CPushButton("Edit Label")
+    self.edit_btn = CPushButton("Doi ten")
     self.edit_btn.clicked.connect(self.editLabel)
-    self.delete_btn = CPushButton("Delete Barcode")
+    self.delete_btn = CPushButton("Xoa")
     self.delete_btn.clicked.connect(self.deleteBarCode)
 
     # --- layout ---
@@ -56,6 +56,8 @@ class BarcodeWidget(QWidget):
     toolWidget = QWidget()
     toolWidget.setLayout(tool)
     layout.addWidget(toolWidget)
+    layout.setStretch(0, 4)
+    layout.setStretch(1, 1)
     self.setLayout(layout)
 
   def editLabel(self):

@@ -10,33 +10,36 @@ from view.components.MyWidget import CWidget
 from view.components import gen_vietqr
 from view.components.Calendar import CalendarDialog
 from view.components.CPushButton import CPushButton
+from view.CustomBarcodesWindow import BarcodeListWindow 
 
 class OrderWindow(QWidget):
   def __init__(self):
     super().__init__()
     self.createLayout()
   def popupQRCode(self):
-    account_number = self.db.loadSetting("bank_number")
-    bank_bin = self.db.loadSetting("bank_bin")
+    account_number = self.db.loadSetting("bank_number") or "0711000273413"
+    bank_bin = self.db.loadSetting("bank_bin") or "970436"
     name = 'Tap hoa hien duong' 
     amount = self.total_order_price
     qr = gen_vietqr.generate_vietqr(account_number, bank_bin, name, amount, "Thanh toan don hang", "vietqr.png")
     self.QRDialog = gen_vietqr.QRDialog(qr, self)
   def setDatabase(self, database: Model):
     self.db = database
+    self.customBarcodesWindow = BarcodeListWindow(self.db)
+    self.customBarcodes.clicked.connect(self.customBarcodesWindow.show)
   def createLayout(self):
     self.utilColumn = CWidget()
     self.utilLayout = QVBoxLayout()
     self.utilTabWidget = QTabWidget()
     self.utilTabWidget.setTabPosition(QTabWidget.TabPosition.North)
     orderTabContent = QHBoxLayout()
-    orderTabContent.addWidget(QLabel("Thong tin order"))
-    orderTabContent.addWidget(QLabel("Ket qua tim kiem"))
+    orderTabContent.addWidget(QLabel("Thông tin đơn hàng"))
+    orderTabContent.addWidget(QLabel("Kết quả tìm kiếm"))
     tabWidget = CWidget()
     tabWidget.setLayout(orderTabContent)
-    self.utilTabWidget.addTab(tabWidget, "Tim kiem order")
+    self.utilTabWidget.addTab(tabWidget, "Tìm kiếm order")
     self.utilLayout.addWidget(self.utilTabWidget)
-    self.utilLayout.addWidget(CPushButton("Tim kiem"), alignment=Qt.AlignmentFlag.AlignCenter)
+    self.utilLayout.addWidget(CPushButton("Tìm kiếm"), alignment=Qt.AlignmentFlag.AlignCenter)
     self.utilColumn.setLayout(self.utilLayout)
 
 
@@ -48,7 +51,7 @@ class OrderWindow(QWidget):
     # Table widget
     self.order_items = QTableWidget()
     self.order_items.setColumnCount(6)
-    self.order_items.setHorizontalHeaderLabels(["ID", "Item", "Unit Price", "Quantity", "Total",''])
+    self.order_items.setHorizontalHeaderLabels(["ID", "Sản phẩm", "Giá", "Số lượng", "Tổng",''])
     self.order_items.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
     self.order_items.horizontalHeader().setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)
 
@@ -85,7 +88,7 @@ class OrderWindow(QWidget):
     self.order_date = QLineEdit()
     self.order_date.setPlaceholderText(Date.today().strftime("%Y-%m-%d"))
     self.customer_name = QLineEdit()
-    self.customer_name_lable = QLabel("Ten khach hang")
+    self.customer_name_lable = QLabel("Tên khách hàng")
     order_date_layout = QHBoxLayout()
     order_date_layout.addWidget(self.order_date)
     calendar_button = QPushButton()
@@ -96,13 +99,13 @@ class OrderWindow(QWidget):
     order_date_widget = CWidget()
     order_date_widget.setLayout(order_date_layout)
     self.order_status = QCheckBox()
-    header_layout.addWidget(QLabel("Ma don hang"), 0, 0)
+    header_layout.addWidget(QLabel("Mã đơn hàng"), 0, 0)
     header_layout.addWidget(self.order_id, 0, 1)
-    header_layout.addWidget(QLabel("Ngay/gio"), 1, 0)
+    header_layout.addWidget(QLabel("Ngày/giờ"), 1, 0)
     header_layout.addWidget(order_date_widget, 1, 1)
     header_layout.addWidget(self.customer_name_lable, 2, 0)
     header_layout.addWidget(self.customer_name, 2, 1)
-    header_layout.addWidget(QLabel("Da thanh toan"), 3, 0)
+    header_layout.addWidget(QLabel("Đã thanh toán"), 3, 0)
     header_layout.addWidget(self.order_status, 3, 1)
     header_layout.setColumnStretch(0,1)
     header_layout.setColumnStretch(1,2)
@@ -113,19 +116,22 @@ class OrderWindow(QWidget):
     layout.addWidget(footer)
 
 
-    self.createOrderBtn = CPushButton("Payment")
-    self.createOrderBtn.setMinimumHeight(40)
-    self.cancelOrderBtn = CPushButton("Cancel")
-    self.cancelOrderBtn.setMinimumHeight(40)
+    self.createOrderBtn = CPushButton("Thanh toán")
+    self.cancelOrderBtn = CPushButton("Hủy")
    
-    self.saveOrderBtn = CPushButton("Save")
-    self.saveOrderBtn.setMinimumHeight(40)
+    self.saveOrderBtn = CPushButton("Lưu trữ")
+    self.customBarcodes = QPushButton("")
+    self.customBarcodes.setIcon(QIcon.fromTheme("barcode"))
+    self.customBarcodes.setFixedSize(40, 40)
+    self.customBarcodes.setIconSize(self.customBarcodes.size() * 0.8)
+
    
     layout = QGridLayout()
-    layout.addWidget(self.infoBox, 0, 0, 1, 3)
+    layout.addWidget(self.infoBox, 0, 0, 1, 4)
     layout.addWidget(self.createOrderBtn, 1, 0)
     layout.addWidget(self.cancelOrderBtn, 1, 1)
     layout.addWidget(self.saveOrderBtn, 1, 2)
+    layout.addWidget(self.customBarcodes, 1, 3)
     layout.setRowStretch(0, 1)
     layout.setRowStretch(1, 1)
     self.infoColumn.setLayout(layout)

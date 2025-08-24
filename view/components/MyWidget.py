@@ -16,9 +16,9 @@ class CWidget(QWidget):
     border_color = f"rgb({r}, {g}, {b})"
     
     # Apply background and border using stylesheet
-    self.setStyleSheet(f"""
-        border: 2px solid {border_color};
-    """)
+    #self.setStyleSheet(f"""
+    #    border: 2px solid {border_color};
+    #""")
     #layout = QVBoxLayout()
     #label = QLabel()
     #layout.addWidget(label)

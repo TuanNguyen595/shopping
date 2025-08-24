@@ -7,6 +7,8 @@ from PySide6.QtCore import Qt
 from view.components.MyWidget import CWidget
 from view.components.CPushButton import CPushButton
 from model import Model
+from view.CustomBarcodesWindow import BarcodeListWindow
+from PySide6.QtGui import QIcon
 
 class ImportWindow(QWidget):
   def __init__(self):
@@ -14,6 +16,9 @@ class ImportWindow(QWidget):
     self.createLayout()
   def setDatabase(self, database: Model):
     self.db = database
+    self.customBarcodesWindow = BarcodeListWindow(self.db)
+    self.customBarcodes.clicked.connect(self.customBarcodesWindow.show)
+ 
   def createLayout(self):
     layout = QVBoxLayout()
     self.layoutGrid = QHBoxLayout()
@@ -24,12 +29,12 @@ class ImportWindow(QWidget):
     self.layoutGrid.addLayout(self.infoColumn)
     layout.addLayout(self.layoutGrid)
     layout.addLayout(self.toolColumn)
-    self.headerColumn.addWidget(QLabel("Ma san pham"))
-    self.headerColumn.addWidget(QLabel("Ten san pham"))
-    self.headerColumn.addWidget(QLabel("So luong"))
-    self.headerColumn.addWidget(QLabel("Gia nhap vao"))
-    self.headerColumn.addWidget(QLabel("Gia ban le"))
-    self.headerColumn.addWidget(QLabel("Gia ban buon"))
+    self.headerColumn.addWidget(QLabel("Mã sản phẩm"))
+    self.headerColumn.addWidget(QLabel("Tên sản phẩm"))
+    self.headerColumn.addWidget(QLabel("Số lượng"))
+    self.headerColumn.addWidget(QLabel("Giá nhập vào"))
+    self.headerColumn.addWidget(QLabel("Giá bán lẻ"))
+    #self.headerColumn.addWidget(QLabel("Giá bán buôn"))
     self.itemID = QLineEdit()
     self.itemID.setPlaceholderText("Ma san pham")
     self.itemName = QLineEdit()
@@ -51,15 +56,22 @@ class ImportWindow(QWidget):
     self.infoColumn.addWidget(self.itemInStock)
     self.infoColumn.addWidget(self.importPrice)
     self.infoColumn.addWidget(self.retailPrice)
-    self.infoColumn.addWidget(self.wholesalePrice)
-    self.addButton = CPushButton("Add")
-    self.editButton = CPushButton("Update")
-    self.removeButton = CPushButton("Remove")
-    self.findButton = CPushButton("Find")
+    #self.infoColumn.addWidget(self.wholesalePrice)
+    self.addButton = CPushButton("Thêm mới")
+    self.editButton = CPushButton("Cập nhật")
+    self.removeButton = CPushButton("Xóa")
+    self.findButton = CPushButton("Tìm kiếm")
+    self.customBarcodes = QPushButton()
+    self.customBarcodes.setIcon(QIcon.fromTheme("barcode"))
+    self.customBarcodes.setFixedSize(40, 40)
+    self.customBarcodes.setIconSize(self.customBarcodes.size() * 0.8)
+
+
     self.toolColumn.addWidget(self.addButton)
     self.toolColumn.addWidget(self.editButton)
     self.toolColumn.addWidget(self.removeButton)
     self.toolColumn.addWidget(self.findButton)
+    self.toolColumn.addWidget(self.customBarcodes)
     self.setLayout(layout)
 
   def clearInput(self):
@@ -80,4 +92,8 @@ class ImportWindow(QWidget):
       self.importPrice.setText(str(item[5]))
       self.retailPrice.setText(str(item[3]))
       self.wholesalePrice.setText(str(item[4]))
+    item = self.db.getBarcodeByCode(text)
+    if item:
+      self.itemName.setText(item[2])
+ 
   

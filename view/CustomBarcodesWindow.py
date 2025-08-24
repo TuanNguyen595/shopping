@@ -34,7 +34,7 @@ class BarcodeListWindow(QWidget):
         self.scroll.setWidget(self.list_container)
 
         # buttons
-        self.add_btn = QPushButton("Add New Barcode")
+        self.add_btn = QPushButton("Them san pham moi")
         self.add_btn.clicked.connect(self.add_barcode)
 
         layout = QVBoxLayout(self)
@@ -54,6 +54,7 @@ class BarcodeListWindow(QWidget):
             if item:
                 item.setParent(None)
         rows = self.db.getAllBarcodes()
+        rows.sort(key=lambda r: r[2].lower())
         for bid, code, name in rows:
             if filter_text and filter_text.lower() not in name.lower():
                 continue
