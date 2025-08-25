@@ -1,3 +1,4 @@
+import os
 from PySide6.QtGui import QIntValidator
 from PySide6.QtWidgets import (
   QLabel, QLayout, QLineEdit, QMainWindow, QGridLayout, QPushButton, QVBoxLayout, QWidget, QHBoxLayout,
@@ -62,7 +63,8 @@ class ImportWindow(QWidget):
     self.removeButton = CPushButton("Xóa")
     self.findButton = CPushButton("Tìm kiếm")
     self.customBarcodes = QPushButton()
-    self.customBarcodes.setIcon(QIcon.fromTheme("barcode"))
+    icon_path = os.path.join(os.getcwd(), "resource", "barcode.jpg")
+    self.customBarcodes.setIcon(QIcon(icon_path))
     self.customBarcodes.setFixedSize(40, 40)
     self.customBarcodes.setIconSize(self.customBarcodes.size() * 0.8)
 
