@@ -1,0 +1,8 @@
+barcode_generator==0.1rc15
+pynput==1.8.1
+pyserial==3.5
+PySide6==6.9.1
+PySide6==6.9.2
+PySide6_Addons==6.9.1
+PySide6_Essentials==6.9.1
+qrcode==8.2
