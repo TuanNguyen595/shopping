@@ -1,6 +1,7 @@
 from view.ImportWindow import ImportWindow
 from PySide6.QtCore import QObject, Signal, Slot
 from model import Model
+import random
 
 class ImportController(QObject):
   def __init__(self, view:ImportWindow, model:Model):
@@ -11,15 +12,26 @@ class ImportController(QObject):
     self.view.editButton.clicked.connect(self.onEditButtonClicked)
     self.view.findButton.clicked.connect(self.onFindButtonClicked)
     self.view.removeButton.clicked.connect(self.onRemoveButtonClicked)
+    self.view.autoGenerateBarcode.clicked.connect(self.onAutoGenerateBarcodeClicked)
 
   @Slot(str)
   def onScannerResult(self, text):
     if(self.view.isVisible()):
       self.view.onScannerResult(text)
 
+  def onAutoGenerateBarcodeClicked(self):
+    code = ''.join(random.choices("0123456789", k=12))
+    self.view.itemID.setText(code)
+    self.view.generatingBarcode = True
+
   def onAddButtonClicked(self):
     itemID = self.view.itemID.text()
     itemName = self.view.itemName.text()
+    if itemName.strip() :
+      self.view.itemNameLabel.setStyleSheet("")
+    else:
+      self.view.itemNameLabel.setStyleSheet("color: red;")
+      return
     if self.view.itemInStock.text() == "":
       itemInStock = 0
     else:
@@ -37,6 +49,10 @@ class ImportController(QObject):
     else:
       wholesalePrice = int(self.view.wholesalePrice.text())
     self.model.addItem(itemID, itemName, itemInStock, importPrice, retailPrice, wholesalePrice)
+    if self.view.generatingBarcode:
+      code = self.view.itemID.text()
+      name = self.view.itemName.text()
+      self.model.addBarcode(name, code)
   def onEditButtonClicked(self):
     self.model.changeItemName(self.view.itemID.text(), self.view.itemName.text())
     if self.view.itemInStock.text() != "":

@@ -13,13 +13,13 @@ class BarcodeListWindow(QWidget):
 
     def __init__(self, db: Model):
         super().__init__()
-        self.setWindowTitle("Barcode Manager")
+        self.setWindowTitle("Mã vạch riêng")
         self.resize(550, 450)
         self.db = db
 
         # search bar
         self.search_box = QLineEdit()
-        self.search_box.setPlaceholderText("Search by name...")
+        self.search_box.setPlaceholderText("Tìm kiếm theo tên...")
         self.search_box.textChanged.connect(self.filter_barcodes)
 
         #self.timer = QTimer(self)
@@ -34,7 +34,7 @@ class BarcodeListWindow(QWidget):
         self.scroll.setWidget(self.list_container)
 
         # buttons
-        self.add_btn = QPushButton("Them san pham moi")
+        self.add_btn = QPushButton("Thêm mã vạch mới")
         self.add_btn.clicked.connect(self.add_barcode)
 
         layout = QVBoxLayout(self)
@@ -66,9 +66,7 @@ class BarcodeListWindow(QWidget):
 
     def editBarcodeName(self, code: str, new_name: str):
         """Edit barcode name and refresh list."""
-        print(f"Editing barcode {code} to new name: {new_name}")
         barcode = self.db.getBarcodeByCode(code)
-        print(f"Found barcode in DB: {barcode}")
         if barcode:
             self.db.updateBarcodeName(barcode[0], new_name)
         self.load_barcodes()
@@ -79,7 +77,7 @@ class BarcodeListWindow(QWidget):
         name = barcode[2] if barcode else "Unknown"
         confirm = QMessageBox.question(
             self, "Confirm Delete",
-            f"Ban muon xoa san pham {name}?",
+            f"Bạn muốn xóa {name}?",
             QMessageBox.Yes | QMessageBox.No
         )
         if confirm == QMessageBox.Yes:
@@ -93,7 +91,7 @@ class BarcodeListWindow(QWidget):
     def add_barcode(self):
         """Add new barcode and refresh list."""
         code = ''.join(random.choices("0123456789", k=12))
-        name, ok2 = QInputDialog.getText(self, "New Barcode", "Enter name (label):")
+        name, ok2 = QInputDialog.getText(self, "Mã mới", "Nhập tên:")
         if not ok2 or not name.strip():
             return
         self.db.addBarcode(name.strip(), code)
@@ -101,4 +99,11 @@ class BarcodeListWindow(QWidget):
 
     def filterTimerCheck(self):
         self.filter_barcodes(self.search_box.text().strip())
+
+    def showEvent(self, event):
+        """Called when the widget is shown."""
+        super().showEvent(event) # Call the base class's showEvent
+        self.load_barcodes() # Trigger data refresh when the widget is shown
+
+
 
