@@ -1,6 +1,7 @@
 import qrcode
 from PySide6.QtWidgets import QDialog, QPushButton
 from PySide6.QtCore import Qt
+from i18n import t
 
 def generate_vietqr(account_number: str, bank_bin: str, name: str, amount: int, message: str, output_file="vietqr.png"):
     # VietQR static payload (simplified, not full EMV standard with CRC)
@@ -47,7 +48,7 @@ def vietqr_crc16(data_str: str) -> str:
 class QRDialog(QDialog):
     def __init__(self, qr_pil_image, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("QR Code")
+        self.setWindowTitle(t("qr_title"))
         self.setFixedSize(300, 320)
 
         from io import BytesIO
@@ -66,8 +67,8 @@ class QRDialog(QDialog):
         label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(label)
 
-        self.paid_button = QPushButton('Da thanh toan')
-        self.unpaid_button = QPushButton('Chua thanh toan')
+        self.paid_button = QPushButton(t("btn_paid"))
+        self.unpaid_button = QPushButton(t("btn_unpaid"))
         layout.addWidget(self.paid_button)
         layout.addWidget(self.unpaid_button)
 

@@ -1,8 +1,10 @@
+import os
 import sqlite3
 
 class Model:
   def __init__(self):
-    self.conn = sqlite3.connect('tap_hoa.db')
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tap_hoa.db')
+    self.conn = sqlite3.connect(db_path)
     self.cursor = self.conn.cursor()
     self.createTable()
   def createTable(self):
@@ -111,6 +113,13 @@ class Model:
     self.cursor.execute("INSERT INTO ordered_items (order_id, item, quantity) VALUES (?, ?, ?)", (order_id, item_id, quantity))
     self.conn.commit()
     return self.cursor.lastrowid
+  def updateOrder(self, order_id, customer_id, order_date, total_amount, paid):
+    self.cursor.execute("UPDATE orders SET customer_id=?, order_date=?, total_amount=?, paid=? WHERE order_id=?",
+                        (customer_id, order_date, total_amount, paid, order_id))
+    self.conn.commit()
+  def deleteOrderedItemsByOrderId(self, order_id):
+    self.cursor.execute("DELETE FROM ordered_items WHERE order_id = ?", (order_id,))
+    self.conn.commit()
   def close(self):
     self.conn.close()
   def getItemById(self, item_id):
@@ -183,5 +192,83 @@ class Model:
     self.cursor.execute("SELECT stock FROM item WHERE item_id = ?", (item_id,))
     row = self.cursor.fetchone()
     return row[0] if row else None
+
+  def getAllCustomerNames(self):
+    self.cursor.execute("SELECT name FROM customer WHERE name IS NOT NULL ORDER BY name")
+    return [row[0] for row in self.cursor.fetchall()]
+
+  def getAllItemNames(self):
+    self.cursor.execute("SELECT item_name FROM item WHERE item_name IS NOT NULL ORDER BY item_name")
+    return [row[0] for row in self.cursor.fetchall()]
+
+  def searchOrders(self, customer_name="", start_date="", end_date="", unpaid_only=False):
+    query = """
+      SELECT o.order_id, c.name, o.order_date, o.total_amount, o.paid
+      FROM orders o
+      LEFT JOIN customer c ON o.customer_id = c.customer_id
+      WHERE 1=1
+    """
+    params = []
+    if customer_name:
+      query += " AND c.name LIKE ?"
+      params.append(f"%{customer_name}%")
+    if start_date:
+      query += " AND o.order_date >= ?"
+      params.append(start_date)
+    if end_date:
+      query += " AND o.order_date <= ?"
+      params.append(end_date)
+    if unpaid_only:
+      query += " AND o.paid = 0"
+    query += " ORDER BY o.order_id DESC"
+    self.cursor.execute(query, params)
+    return self.cursor.fetchall()
+
+  def getMonthlyStats(self, year: int):
+    """Return list of 12 rows: (month, revenue, cost, profit)
+       revenue = sum of total_amount for paid orders in that month
+       cost    = sum of imported_price * quantity for items in those orders
+    """
+    self.cursor.execute("""
+      SELECT
+        CAST(strftime('%m', o.order_date) AS INTEGER) AS month,
+        SUM(o.total_amount) AS revenue,
+        SUM(oi.quantity * i.imported_price) AS cost
+      FROM orders o
+      JOIN ordered_items oi ON oi.order_id = o.order_id
+      JOIN item i ON i.item_id = oi.item
+      WHERE o.paid = 1
+        AND strftime('%Y', o.order_date) = ?
+      GROUP BY month
+      ORDER BY month
+    """, (str(year),))
+    rows = {r[0]: (r[1] or 0, r[2] or 0) for r in self.cursor.fetchall()}
+    result = []
+    for m in range(1, 13):
+      revenue, cost = rows.get(m, (0, 0))
+      result.append((m, revenue, cost, revenue - cost))
+    return result
+
+  def getOrderYears(self):
+    """Return distinct years that have paid orders."""
+    self.cursor.execute(
+      "SELECT DISTINCT strftime('%Y', order_date) FROM orders WHERE paid=1 ORDER BY 1 DESC"
+    )
+    return [int(r[0]) for r in self.cursor.fetchall()]
+
+  def getDailyOrderCounts(self, year: int, month: int):
+    """Return list of (day, order_count) for every day in the given year/month."""
+    import calendar
+    days_in_month = calendar.monthrange(year, month)[1]
+    self.cursor.execute("""
+      SELECT CAST(strftime('%d', order_date) AS INTEGER) AS day, COUNT(*) AS cnt
+      FROM orders
+      WHERE strftime('%Y', order_date) = ?
+        AND strftime('%m', order_date) = ?
+      GROUP BY day
+      ORDER BY day
+    """, (str(year), f"{month:02d}"))
+    rows = {r[0]: r[1] for r in self.cursor.fetchall()}
+    return [(d, rows.get(d, 0)) for d in range(1, days_in_month + 1)]
 
 

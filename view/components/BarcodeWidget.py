@@ -8,6 +8,7 @@ from PySide6.QtWidgets import (
 from barcode import Code128
 from barcode.writer import ImageWriter
 from view.components.CPushButton import CPushButton
+from i18n import t
 
 
 def barcode_qimage(data: str) -> QImage:
@@ -34,9 +35,9 @@ class BarcodeWidget(QWidget):
     self.text_label = QLabel(label_text, alignment=Qt.AlignCenter)
 
     # --- button ---
-    self.edit_btn = CPushButton("Doi ten")
+    self.edit_btn = CPushButton(t("btn_rename"))
     self.edit_btn.clicked.connect(self.editLabel)
-    self.delete_btn = CPushButton("Xoa")
+    self.delete_btn = CPushButton(t("btn_delete"))
     self.delete_btn.clicked.connect(self.deleteBarCode)
 
     # --- layout ---
@@ -61,13 +62,17 @@ class BarcodeWidget(QWidget):
     self.setLayout(layout)
 
   def editLabel(self):
-    new_text, ok = QInputDialog.getText(self, "Edit Label", "Enter new text:", text=self.text_label.text())
+    new_text, ok = QInputDialog.getText(self, t("edit_label_title"), t("edit_label_prompt"), text=self.text_label.text())
     if ok and new_text.strip():
       self.text_label.setText(new_text)
       self.editNameEmitter.emit(self.code, new_text)
 
   def deleteBarCode(self):
     self.deleteEmitter.emit(self.code)
+
+  def retranslate(self):
+    self.edit_btn.setText(t("btn_rename"))
+    self.delete_btn.setText(t("btn_delete"))
 
   deleteEmitter = Signal(str)
   editNameEmitter = Signal(str, str)
